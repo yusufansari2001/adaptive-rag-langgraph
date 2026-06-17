@@ -1,5 +1,8 @@
-from app.config.settings import settings
+from app.llm.groq_client import llm
 
-print("Model:", settings.MODEL_NAME)
-print("Chunk Size:", settings.CHUNK_SIZE)
-print("Chunk Overlap:", settings.CHUNK_OVERLAP)
+
+response = llm.invoke(
+    "Explain Spring Boot in one sentence."
+)
+
+print(response.content)
