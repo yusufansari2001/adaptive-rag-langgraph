@@ -1,8 +1,15 @@
-from app.llm.groq_client import llm
+from app.vectorstore.ingest import load_pdf, split_documents
+from app.vectorstore.retriever import create_vectorstore
 
-
-response = llm.invoke(
-    "Explain Spring Boot in one sentence."
+documents = load_pdf(
+    "data/documents/LAB_RECORDS.pdf"
 )
 
-print(response.content)
+chunks = split_documents(documents)
+
+vectorstore = create_vectorstore(chunks)
+
+print(f"Pages loaded: {len(documents)}")
+print(f"Chunks created: {len(chunks)}")
+
+print("\nVector store created successfully!")
