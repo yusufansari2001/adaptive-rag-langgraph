@@ -16,3 +16,27 @@ def create_vectorstore(chunks):
     )
 
     return vectorstore
+
+
+def save_vectorstore(vectorstore):
+    """
+    Save FAISS index locally.
+    """
+
+    vectorstore.save_local("vector_store")
+
+
+def load_vectorstore():
+    """
+    Load FAISS index from disk.
+    """
+
+    embedding_model = get_embedding_model()
+
+    vectorstore = FAISS.load_local(
+        "vector_store",
+        embedding_model,
+        allow_dangerous_deserialization=True
+    )
+
+    return vectorstore
