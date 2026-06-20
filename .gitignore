@@ -8,3 +8,8 @@ __pycache__/
 .vscode/
 
 .DS_Store
+
+vector_store/
+uploads/
+__pycache__/
+*.pyc
