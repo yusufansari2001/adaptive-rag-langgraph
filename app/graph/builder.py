@@ -5,6 +5,7 @@ from app.graph.nodes import (
     router_node,
     llm_node,
     web_node,
+    query_rewriter_node,
     retriever_node,
     grader_node,
     generator_node
@@ -30,6 +31,7 @@ def build_graph():
     graph.add_node("llm", llm_node)
     graph.add_node("web", web_node)
 
+    graph.add_node("query_rewriter", query_rewriter_node)
     graph.add_node("retriever", retriever_node)
     graph.add_node("grader", grader_node)
     graph.add_node("generate", generator_node)
@@ -48,13 +50,18 @@ def build_graph():
         {
             "llm": "llm",
             "web": "web",
-            "retriever": "retriever"
+            "retriever": "query_rewriter"
         }
     )
 
     # ==========================
     # RAG Branch
     # ==========================
+    graph.add_edge(
+        "query_rewriter",
+        "retriever"
+    )
+
     graph.add_edge(
         "retriever",
         "grader"
@@ -65,7 +72,7 @@ def build_graph():
         route_after_grader,
         {
             "generate": "generate",
-            "end": END
+            "web": "web"
         }
     )
 

@@ -18,4 +18,4 @@ def route_after_grader(state):
     if grade.lower() == "yes":
         return "generate"
 
-    return "end"
+    return "web"

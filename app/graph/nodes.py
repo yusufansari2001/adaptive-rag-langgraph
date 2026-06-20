@@ -3,6 +3,7 @@ from app.rag.general_llm import answer_with_llm
 from app.rag.web_search import answer_with_web_search
 from app.rag.grader import grade_documents
 from app.rag.generator import generate_answer
+from app.rag.query_rewriter import rewrite_query
 from app.vectorstore.retriever import retrieve_documents
 
 
@@ -36,10 +37,34 @@ def web_node(state):
     }
 
 
-def retriever_node(state):
+def query_rewriter_node(state):
+    """
+    Rewrite query before retrieval.
+    """
+
     question = state["question"]
 
-    results = retrieve_documents(question)
+    rewritten_question = rewrite_query(question)
+
+    print("\nOriginal Question:")
+    print(question)
+
+    print("\nRewritten Question:")
+    print(rewritten_question)
+
+    return {
+        "rewritten_question": rewritten_question
+    }
+
+
+def retriever_node(state):
+    """
+    Retrieve using rewritten query.
+    """
+
+    query = state["rewritten_question"]
+
+    results = retrieve_documents(query)
 
     context_parts = []
 
