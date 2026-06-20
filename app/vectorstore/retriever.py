@@ -40,3 +40,17 @@ def load_vectorstore():
     )
 
     return vectorstore
+
+def retrieve_documents(query: str, k: int = 3):
+    """
+    Retrieve relevant chunks for a query.
+    """
+
+    vectorstore = load_vectorstore()
+
+    results = vectorstore.similarity_search(
+        query=query,
+        k=k
+    )
+
+    return results
