@@ -1,18 +1,19 @@
-from app.rag.grader import grade_documents
+from app.graph.builder import build_graph
 
+graph = build_graph()
 
-question = "What is Spring Boot?"
+while True:
 
-context = """
-FIRST set contains all terminals that can appear as the first symbol.
-FOLLOW set contains all terminals that can appear after a non-terminal.
-"""
+    question = input("\nAsk a question (type 'exit' to quit): ")
 
-result = grade_documents(
-    question=question,
-    context=context
-)
+    if question.lower() == "exit":
+        break
 
-print(result)
-print()
-print(f"Relevant: {result.relevant}")
+    result = graph.invoke(
+        {
+            "question": question
+        }
+    )
+
+    print("\nAnswer:\n")
+    print(result["answer"])
