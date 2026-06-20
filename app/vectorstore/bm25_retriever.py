@@ -1,3 +1,5 @@
+import os
+
 from rank_bm25 import BM25Okapi
 
 from app.vectorstore.ingest import (
@@ -6,23 +8,61 @@ from app.vectorstore.ingest import (
 )
 
 
-def create_bm25_retriever():
+UPLOAD_DIR = "uploads"
+
+
+def get_latest_uploaded_pdf():
     """
-    Create BM25 retriever from document chunks.
+    Get latest uploaded PDF.
     """
 
-    documents = load_pdf(
-        "data/documents/LAB_RECORDS.pdf"
+    pdf_files = [
+        os.path.join(
+            UPLOAD_DIR,
+            file
+        )
+        for file in os.listdir(
+            UPLOAD_DIR
+        )
+        if file.endswith(".pdf")
+    ]
+
+    if not pdf_files:
+        raise ValueError(
+            "No uploaded PDF found."
+        )
+
+    pdf_files.sort(
+        key=os.path.getmtime,
+        reverse=True
     )
 
-    chunks = split_documents(documents)
+    return pdf_files[0]
+
+
+def create_bm25_retriever():
+    """
+    Create BM25 retriever from latest uploaded PDF.
+    """
+
+    latest_pdf = get_latest_uploaded_pdf()
+
+    documents = load_pdf(
+        latest_pdf
+    )
+
+    chunks = split_documents(
+        documents
+    )
 
     tokenized_chunks = [
         chunk.page_content.split()
         for chunk in chunks
     ]
 
-    bm25 = BM25Okapi(tokenized_chunks)
+    bm25 = BM25Okapi(
+        tokenized_chunks
+    )
 
     return bm25, chunks
 
@@ -35,9 +75,13 @@ def retrieve_bm25(
     Retrieve top chunks using BM25.
     """
 
-    bm25, chunks = create_bm25_retriever()
+    bm25, chunks = (
+        create_bm25_retriever()
+    )
 
-    tokenized_query = query.split()
+    tokenized_query = (
+        query.split()
+    )
 
     scores = bm25.get_scores(
         tokenized_query

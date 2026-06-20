@@ -22,6 +22,7 @@ UPLOAD_DIR = "uploads"
 
 class QuestionRequest(BaseModel):
     question: str
+    session_id: str | None = None
 
 
 class QuestionResponse(BaseModel):
