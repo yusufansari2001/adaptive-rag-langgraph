@@ -59,16 +59,23 @@ def query_rewriter_node(state):
 
 def retriever_node(state):
     """
-    Retrieve using rewritten query.
+    Hybrid Retrieval using FAISS + BM25.
     """
 
     query = state["rewritten_question"]
 
     results = retrieve_documents(query)
 
+    print("\nRetrieved Documents:")
+
     context_parts = []
 
-    for doc, score in results:
+    for i, (doc, score) in enumerate(results, start=1):
+
+        print(f"\n===== DOC {i} =====")
+        print(f"Score: {score}")
+        print(doc.page_content[:300])
+
         context_parts.append(doc.page_content)
 
     context = "\n\n".join(context_parts)
@@ -86,6 +93,8 @@ def grader_node(state):
         question=question,
         context=context
     )
+
+    print(f"\nRelevance Score: {grade.relevant}")
 
     return {
         "grade": grade.relevant

@@ -1,6 +1,7 @@
 from langchain_community.vectorstores import FAISS
 
 from app.vectorstore.embeddings import get_embedding_model
+from app.vectorstore.bm25_retriever import retrieve_bm25
 
 
 def create_vectorstore(chunks):
@@ -44,14 +45,40 @@ def load_vectorstore():
 
 def retrieve_documents(query: str, k: int = 10):
     """
-    Retrieve relevant chunks along with similarity scores.
+    Hybrid Retrieval:
+    FAISS + BM25
     """
 
     vectorstore = load_vectorstore()
 
-    results = vectorstore.similarity_search_with_score(
+    faiss_results = vectorstore.similarity_search_with_score(
         query=query,
-        k=k
+        k=5
     )
 
-    return results
+    bm25_results = retrieve_bm25(
+        query=query,
+        k=5
+    )
+
+    combined = []
+
+    seen = set()
+
+    for doc, score in faiss_results:
+
+        content = doc.page_content
+
+        if content not in seen:
+            seen.add(content)
+            combined.append((doc, score))
+
+    for doc, score in bm25_results:
+
+        content = doc.page_content
+
+        if content not in seen:
+            seen.add(content)
+            combined.append((doc, score))
+
+    return combined
