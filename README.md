@@ -2,17 +2,7 @@
 
 > An **agentic RAG pipeline** built with **LangGraph** that doesn't just retrieve-then-generate — it *thinks* about how to answer. Every question is routed to the cheapest, most reliable strategy: a direct LLM answer, a hybrid document search, or a live web search — with self-correction baked in via document grading and automatic fallback.
 
-![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=for-the-badge)
-![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge)
-![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
-![Groq](https://img.shields.io/badge/Groq-F55036?style=for-the-badge)
-![FAISS](https://img.shields.io/badge/FAISS-009999?style=for-the-badge)
-![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-FFD21E?style=for-the-badge)
-![Tavily](https://img.shields.io/badge/Tavily-Web%20Search-2E2E2E?style=for-the-badge)
-![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)
-![uv](https://img.shields.io/badge/uv-DE5FE9?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=flat-square&logo=python&logoColor=white) ![LangGraph](https://img.shields.io/badge/LangGraph-1C3C3C?style=flat-square) ![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=flat-square) ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) ![Groq](https://img.shields.io/badge/Groq-F55036?style=flat-square) ![FAISS](https://img.shields.io/badge/FAISS-009999?style=flat-square) ![HuggingFace](https://img.shields.io/badge/🤗%20HuggingFace-FFD21E?style=flat-square) ![Tavily](https://img.shields.io/badge/Tavily-Web%20Search-2E2E2E?style=flat-square) ![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=flat-square&logo=pydantic&logoColor=white) ![uv](https://img.shields.io/badge/uv-DE5FE9?style=flat-square)
 
 ---
 
@@ -37,7 +27,7 @@ This adaptive decision-making, combined with a **grade → reject → re-route**
 - **Hybrid retrieval** — combines **FAISS** (dense/semantic) with **BM25** (sparse/lexical) search, deduplicated and merged for better recall than either alone.
 - **Query rewriting** — vague follow-ups like *"how does it work?"* are rewritten into document-grounded, retrievable queries before search.
 - **LLM-as-a-judge grading** — every retrieved context is graded for relevance; irrelevant context triggers an automatic fallback to web search instead of hallucinating.
-- **Conversational memory** — powered by LangGraph's `MemorySaver` checkpointer, so multi-turn conversations resolve pronouns and references correctly.
+- **Conversational memory** — powered by LangGraph's `MemorySaver` checkpointer, so multi-turn conversations resolve pronouns and references correctly *(currently in-process; MongoDB-backed persistence is next on the roadmap)*.
 - **Real-time web search** — Tavily integration for current-events questions, with smart query truncation to respect API limits.
 - **Production-style API + UI** — a FastAPI backend (`/ask`, `/upload`) paired with a Streamlit chat interface for PDF upload and live conversation.
 
@@ -208,10 +198,17 @@ curl -X POST http://localhost:8000/ask \
 
 ## 🗺️ Roadmap
 
+- [ ] **Persistent conversation memory via MongoDB** — currently using LangGraph's in-memory `MemorySaver`, which resets on restart. Swapping in `MongoDBSaver` for durable, multi-session chat history is next.
 - [ ] Multi-hop query decomposition for complex comparison questions
 - [ ] Hallucination grader (answer-vs-context grounding check)
 - [ ] Streaming responses over the API
 - [ ] Dockerized deployment
+
+---
+
+## 🤝 Contributing & Feedback
+
+This is an actively evolving learning project, and I'm genuinely **open to suggestions, code reviews, and PRs** — whether it's a cleaner way to structure the graph, a better retrieval strategy, or catching something I've missed. Feel free to open an issue or drop feedback.
 
 ---
 
