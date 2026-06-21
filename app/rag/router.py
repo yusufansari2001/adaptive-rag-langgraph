@@ -5,7 +5,10 @@ from app.models.route import RouteDecision
 from app.prompts.router import ROUTER_PROMPT
 
 
-def classify_query(question: str) -> RouteDecision:
+def classify_query(
+    question: str,
+    chat_history: str = "No previous conversation."
+) -> RouteDecision:
     """
     Classify user question into:
     rag / web / llm
@@ -17,14 +20,18 @@ def classify_query(question: str) -> RouteDecision:
 
     prompt = PromptTemplate(
         template=ROUTER_PROMPT,
-        input_variables=["question"]
+        input_variables=[
+            "question",
+            "chat_history"
+        ]
     )
 
     chain = prompt | structured_llm
 
     result = chain.invoke(
         {
-            "question": question
+            "question": question,
+            "chat_history": chat_history
         }
     )
 

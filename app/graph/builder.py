@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 
 from app.graph.state import GraphState
 from app.graph.nodes import (
@@ -22,6 +23,7 @@ def build_graph():
     """
 
     graph = StateGraph(GraphState)
+    memory = MemorySaver()
 
     # ==========================
     # Nodes
@@ -50,7 +52,7 @@ def build_graph():
         {
             "llm": "llm",
             "web": "web",
-            "retriever": "query_rewriter"
+            "rag": "query_rewriter"
         }
     )
 
@@ -83,4 +85,6 @@ def build_graph():
     graph.add_edge("web", END)
     graph.add_edge("generate", END)
 
-    return graph.compile()
+    return graph.compile(
+        checkpointer=memory
+    )

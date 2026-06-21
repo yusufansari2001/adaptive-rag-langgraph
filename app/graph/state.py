@@ -1,15 +1,15 @@
-from typing import TypedDict, Optional
+from typing import Any
+
+from langgraph.graph import MessagesState
 
 
-class GraphState(TypedDict):
-    question: str
+class GraphState(MessagesState):
+    route: str | None
 
-    rewritten_question: Optional[str]
+    rewritten_query: str | None
 
-    route: Optional[str]
+    retrieved_docs: list[dict[str, Any]] | None
 
-    context: Optional[str]
+    context: str | None
 
-    grade: Optional[str]
-
-    answer: Optional[str]
+    grade: str | None

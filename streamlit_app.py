@@ -134,6 +134,10 @@ if question:
                 answer = response.json()[
                     "answer"
                 ]
+                st.session_state.session_id = response.json().get(
+                    "session_id",
+                    st.session_state.session_id
+                )
 
                 st.markdown(
                     answer

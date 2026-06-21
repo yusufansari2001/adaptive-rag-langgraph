@@ -1,7 +1,8 @@
 QUERY_REWRITER_PROMPT = """
 You are an expert query rewriter for Retrieval-Augmented Generation (RAG).
 
-Your task is to rewrite the user's question to improve document retrieval.
+Your task is to rewrite the latest user question to improve document retrieval.
+Use the conversation history to resolve follow-up questions and vague references.
 
 Rules:
 - Preserve the original intent.
@@ -31,6 +32,9 @@ What is lexical analysis?
 Rewritten:
 Explain lexical analysis based on the uploaded document.
 
-Question:
+Conversation History:
+{chat_history}
+
+Latest Question:
 {question}
 """

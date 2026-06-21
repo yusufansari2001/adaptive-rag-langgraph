@@ -1,7 +1,8 @@
 ROUTER_PROMPT = """
 You are an expert query router.
 
-Determine the best route for answering the user's question.
+Determine the best route for answering the latest user question.
+Use the conversation history only to resolve references in the latest question.
 
 Available routes:
 
@@ -30,6 +31,9 @@ Examples:
 - What is Spring Boot?
 - Difference between HashMap and HashSet.
 
-Question:
+Conversation History:
+{chat_history}
+
+Latest Question:
 {question}
 """

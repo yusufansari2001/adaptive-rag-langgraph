@@ -1,63 +1,31 @@
-from app.rag.router import classify_query
-from app.rag.general_llm import answer_with_llm
-from app.rag.grader import grade_documents
-from app.rag.generator import generate_answer
-from app.rag.web_search import answer_with_web_search
-from app.vectorstore.retriever import retrieve_documents
+from langchain_core.messages import HumanMessage
+
+from app.graph.builder import build_graph
+from app.graph.message_utils import get_latest_ai_answer
 
 
-def run_adaptive_rag(question: str):
+graph = build_graph()
+
+
+def run_adaptive_rag(
+    question: str,
+    session_id: str = "default"
+):
     """
     Main adaptive rag workflow.
     """
 
-    route = classify_query(question)
+    result = graph.invoke(
+        {
+            "messages": [
+                HumanMessage(content=question)
+            ]
+        },
+        config={
+            "configurable": {
+                "thread_id": session_id
+            }
+        }
+    )
 
-    print(f"\nSelected Route: {route.route}")
-
-    # ==========================
-    # LLM ROUTE
-    # ==========================
-    if route.route == "llm":
-        return answer_with_llm(question)
-
-    # ==========================
-    # WEB ROUTE
-    # ==========================
-    if route.route == "web":
-        return answer_with_web_search(question)
-
-    # ==========================
-    # RAG ROUTE
-    # ==========================
-    if route.route == "rag":
-
-        results = retrieve_documents(question)
-
-        context_parts = []
-
-        for i, (doc, score) in enumerate(results, start=1):
-            print(f"\n===== DOC {i} =====")
-            print(f"Score: {score}")
-            print(doc.page_content[:300])
-
-            context_parts.append(doc.page_content)
-
-        context = "\n\n".join(context_parts)
-
-        grade = grade_documents(
-            question=question,
-            context=context
-        )
-
-        print(f"\nRelevance Score: {grade.relevant}")
-
-        if grade.relevant.lower() == "yes":
-            return generate_answer(
-                question=question,
-                context=context
-            )
-
-        return "No relevant information found in the uploaded documents."
-
-    return "Route not implemented."
+    return get_latest_ai_answer(result)

@@ -1,7 +1,11 @@
 GENERATOR_PROMPT = """
 You are a helpful assistant.
 
-Answer the user's question using ONLY the provided context.
+Answer the latest user question using ONLY the provided context.
+Use conversation history only to understand references in the latest question.
+
+Conversation History:
+{chat_history}
 
 Question:
 {question}

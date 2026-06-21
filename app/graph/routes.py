@@ -3,7 +3,7 @@ def route_after_router(state):
     route = state["route"]
 
     if route == "rag":
-        return "retriever"
+        return "rag"
 
     if route == "web":
         return "web"
@@ -13,9 +13,9 @@ def route_after_router(state):
 
 def route_after_grader(state):
 
-    grade = state["grade"]
+    grade = state.get("grade")
 
-    if grade.lower() == "yes":
+    if grade and grade.lower() == "yes":
         return "generate"
 
     return "web"

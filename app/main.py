@@ -1,6 +1,10 @@
+from langchain_core.messages import HumanMessage
+
 from app.graph.builder import build_graph
+from app.graph.message_utils import get_latest_ai_answer
 
 graph = build_graph()
+SESSION_ID = "cli"
 
 while True:
 
@@ -11,9 +15,16 @@ while True:
 
     result = graph.invoke(
         {
-            "question": question
+            "messages": [
+                HumanMessage(content=question)
+            ]
+        },
+        config={
+            "configurable": {
+                "thread_id": SESSION_ID
+            }
         }
     )
 
     print("\nAnswer:\n")
-    print(result["answer"])
+    print(get_latest_ai_answer(result))

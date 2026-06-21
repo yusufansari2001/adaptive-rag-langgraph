@@ -1,3 +1,5 @@
+from langchain_core.messages import AIMessage
+
 from app.rag.router import classify_query
 from app.rag.general_llm import answer_with_llm
 from app.rag.web_search import answer_with_web_search
@@ -5,35 +7,63 @@ from app.rag.grader import grade_documents
 from app.rag.generator import generate_answer
 from app.rag.query_rewriter import rewrite_query
 from app.vectorstore.retriever import retrieve_documents
+from app.graph.message_utils import (
+    format_chat_history,
+    get_latest_question
+)
+
+
+def _score_to_float(score):
+    try:
+        return float(score)
+    except (TypeError, ValueError):
+        return None
 
 
 def router_node(state):
-    question = state["question"]
+    question = get_latest_question(state)
+    chat_history = format_chat_history(state)
 
-    route = classify_query(question)
+    route = classify_query(
+        question=question,
+        chat_history=chat_history
+    )
+    route_name = route.route.strip().lower()
 
     return {
-        "route": route.route
+        "route": route_name,
+        "rewritten_query": None,
+        "retrieved_docs": None,
+        "context": None,
+        "grade": None
     }
 
 
 def llm_node(state):
-    question = state["question"]
-
-    answer = answer_with_llm(question)
+    answer = answer_with_llm(
+        state["messages"]
+    )
 
     return {
-        "answer": answer
+        "messages": [
+            AIMessage(content=answer)
+        ]
     }
 
 
 def web_node(state):
-    question = state["question"]
+    question = get_latest_question(state)
+    chat_history = format_chat_history(state)
 
-    answer = answer_with_web_search(question)
+    answer = answer_with_web_search(
+        question=question,
+        chat_history=chat_history
+    )
 
     return {
-        "answer": answer
+        "messages": [
+            AIMessage(content=answer)
+        ]
     }
 
 
@@ -42,18 +72,22 @@ def query_rewriter_node(state):
     Rewrite query before retrieval.
     """
 
-    question = state["question"]
+    question = get_latest_question(state)
+    chat_history = format_chat_history(state)
 
-    rewritten_question = rewrite_query(question)
+    rewritten_query = rewrite_query(
+        question=question,
+        chat_history=chat_history
+    )
 
     print("\nOriginal Question:")
     print(question)
 
-    print("\nRewritten Question:")
-    print(rewritten_question)
+    print("\nRewritten Query:")
+    print(rewritten_query)
 
     return {
-        "rewritten_question": rewritten_question
+        "rewritten_query": rewritten_query
     }
 
 
@@ -62,13 +96,14 @@ def retriever_node(state):
     Hybrid Retrieval using FAISS + BM25.
     """
 
-    query = state["rewritten_question"]
+    query = state.get("rewritten_query") or get_latest_question(state)
 
     results = retrieve_documents(query)
 
     print("\nRetrieved Documents:")
 
     context_parts = []
+    retrieved_docs = []
 
     for i, (doc, score) in enumerate(results, start=1):
 
@@ -77,17 +112,25 @@ def retriever_node(state):
         print(doc.page_content[:300])
 
         context_parts.append(doc.page_content)
+        retrieved_docs.append(
+            {
+                "content": doc.page_content,
+                "metadata": doc.metadata,
+                "score": _score_to_float(score)
+            }
+        )
 
     context = "\n\n".join(context_parts)
 
     return {
-        "context": context
+        "context": context,
+        "retrieved_docs": retrieved_docs
     }
 
 
 def grader_node(state):
-    question = state["question"]
-    context = state["context"]
+    question = state.get("rewritten_query") or get_latest_question(state)
+    context = state.get("context") or ""
 
     grade = grade_documents(
         question=question,
@@ -102,14 +145,18 @@ def grader_node(state):
 
 
 def generator_node(state):
-    question = state["question"]
-    context = state["context"]
+    question = get_latest_question(state)
+    context = state.get("context") or ""
+    chat_history = format_chat_history(state)
 
     answer = generate_answer(
         question=question,
-        context=context
+        context=context,
+        chat_history=chat_history
     )
 
     return {
-        "answer": answer
+        "messages": [
+            AIMessage(content=answer)
+        ]
     }
